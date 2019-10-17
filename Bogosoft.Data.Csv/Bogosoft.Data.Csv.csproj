@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<AssemblyVersion>1.0.0</AssemblyVersion>
+		<Authors>Clayton Roth</Authors>
+		<Company>Bogosoft</Company>
+		<Copyright>Copyright © 2019</Copyright>
+		<Description>Contracts and implementations for working with CSV data readers and writers.</Description>
+		<FileVersion>1.0.0</FileVersion>
+		<PackageId>Bogosoft.Data.Csv</PackageId>
+		<PackageLicenseUrl>https://raw.githubusercontent.com/bogosoft/Data.Csv/master/LICENSE</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/bogosoft/Data.Csv</PackageProjectUrl>
+		<PackageTags>csv data datareader read</PackageTags>
+		<RepositoryUrl>https://github.com/bogosoft/Data.Csv</RepositoryUrl>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<Title>Bogosoft.Data.Csv</Title>
+		<Version>1.0.0</Version>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
+		<DocumentationFile>bin\Debug\netstandard2.1\Bogosoft.Data.Csv.xml</DocumentationFile>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
+		<DocumentationFile>bin\Release\netstandard2.1\Bogosoft.Data.Csv.xml</DocumentationFile>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <NoWarn>1701;1702;8425</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>1701;1702;8425</NoWarn>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Bogosoft.Data" Version="3.0.0.22" />
+	</ItemGroup>
+</Project>

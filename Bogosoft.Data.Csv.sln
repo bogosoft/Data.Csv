@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bogosoft.Data.Csv", "Bogosoft.Data.Csv\Bogosoft.Data.Csv.csproj", "{C2115A8A-F35F-4DCF-95A2-7A2ADD8F2528}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bogosoft.Data.Csv.Tests", "Bogosoft.Data.Csv.Tests\Bogosoft.Data.Csv.Tests.csproj", "{14B32388-7254-422E-838F-8959EAE85935}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C2115A8A-F35F-4DCF-95A2-7A2ADD8F2528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2115A8A-F35F-4DCF-95A2-7A2ADD8F2528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2115A8A-F35F-4DCF-95A2-7A2ADD8F2528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2115A8A-F35F-4DCF-95A2-7A2ADD8F2528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14B32388-7254-422E-838F-8959EAE85935}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14B32388-7254-422E-838F-8959EAE85935}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14B32388-7254-422E-838F-8959EAE85935}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14B32388-7254-422E-838F-8959EAE85935}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9C246E8C-529F-44CC-8650-A765B3AAFB3E}
+	EndGlobalSection
+EndGlobal
