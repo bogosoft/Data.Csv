@@ -28,6 +28,6 @@
 	  <NoWarn>1701;1702;8425</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Bogosoft.Data" Version="3.0.0.22" />
+		<PackageReference Include="Bogosoft.Data" Version="4.1.0.32" />
 	</ItemGroup>
 </Project>
