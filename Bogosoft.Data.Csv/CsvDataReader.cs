@@ -35,7 +35,7 @@ namespace Bogosoft.Data.Csv
         public static CsvDataReader WithHeadersOnFirstLine(
             TextReader source,
             IEnumerable<FieldDefinition> schema,
-            Func<string, string[], int> parser
+            IParser parser
             )
         {
             if (source is null)
@@ -61,7 +61,7 @@ namespace Bogosoft.Data.Csv
 
             var values = new string[unordered.Length];
 
-            parser.Invoke(source.ReadLine(), values);
+            parser.Parse(source.ReadLine(), values);
 
             for (var i = 0; i < values.Length; i++)
             {
@@ -102,7 +102,7 @@ namespace Bogosoft.Data.Csv
         public static async Task<CsvDataReader> WithHeadersOnFirstLineAsync(
             TextReader source,
             IEnumerable<FieldDefinition> schema,
-            Func<string, string[], int> parser,
+            IParser parser,
             char[] buffer,
             CancellationToken token = default
             )
@@ -137,7 +137,7 @@ namespace Bogosoft.Data.Csv
 
             var values = new string[unordered.Length];
 
-            parser.Invoke(await source.ReadLineAsync().ConfigureAwait(false), values);
+            parser.Parse(await source.ReadLineAsync().ConfigureAwait(false), values);
 
             for (var i = 0; i < values.Length; i++)
             {
@@ -154,7 +154,7 @@ namespace Bogosoft.Data.Csv
         }
 
         readonly Dictionary<string, int> fieldIndicesByName;
-        Func<string, string[], int> parser;
+        IParser parser;
         FieldDefinition[] schema;
         TextReader source;
         string[] values;
@@ -214,7 +214,7 @@ namespace Bogosoft.Data.Csv
         public CsvDataReader(
             TextReader source,
             IEnumerable<FieldDefinition> schema,
-            Func<string, string[], int> parser
+            IParser parser
             )
         {
             if (source is null)
@@ -368,7 +368,7 @@ namespace Bogosoft.Data.Csv
                 return false;
             }
 
-            parser.Invoke(line, values);
+            parser.Parse(line, values);
 
             return true;
         }
@@ -389,7 +389,7 @@ namespace Bogosoft.Data.Csv
                 return false;
             }
 
-            parser.Invoke(line, values);
+            parser.Parse(line, values);
 
             return true;
         }
