@@ -81,7 +81,7 @@ namespace Bogosoft.Data.Csv.Tests
         public async Task AttemptingToAsyncParseTextReaderWithNullParserThrowsArgumentNullException()
         {
             string[] fields = { };
-            Func<string, string[], int> parser = null;
+            IParser parser = null;
 
             using var stream = new MemoryStream();
             using var reader = new StreamReader(stream);
@@ -116,7 +116,7 @@ namespace Bogosoft.Data.Csv.Tests
         {
             var fields = new string[0];
             var lines = AsyncEnumerable<string>.Empty;
-            var parser = (Func<string, string[], int>)null;
+            var parser = (IParser)null;
 
             fields.ShouldNotBeNull();
             lines.ShouldNotBeNull();
@@ -193,7 +193,7 @@ namespace Bogosoft.Data.Csv.Tests
         [TestCase]
         public void AttemptingToParseASequenceOfLinesWithANullParserThrowsArgumentNullException()
         {
-            Func<string, string[], int> parser = null;
+            IParser parser = null;
 
             Action test = () => parser.Parse(new string[0], new string[0]).Consume();
 
@@ -207,7 +207,7 @@ namespace Bogosoft.Data.Csv.Tests
             using var reader = new StreamReader(stream);
 
             string[] fields = { };
-            Func<string, string[], int> parser = null;
+            IParser parser = null;
 
             fields.ShouldNotBeNull();
             reader.ShouldNotBeNull();
@@ -237,7 +237,7 @@ namespace Bogosoft.Data.Csv.Tests
         [TestCase]
         public void CreatingDefaultParserWithNullBufferThrowsArgumentNullException()
         {
-            Func<string, string[], int> parser;
+            IParser parser;
 
             Action test = () => parser = Parser.Create(null);
 
@@ -258,13 +258,13 @@ namespace Bogosoft.Data.Csv.Tests
             var actual = new string[expected.Length];
             var parser = Parser.Create(2048, delimiter, quote);
 
-            parser.Invoke(record, actual).ShouldBe(expected.Length);
+            parser.Parse(record, actual).ShouldBe(expected.Length);
 
             AreEqual(actual, expected).ShouldBeFalse();
 
             record = string.Join(delimiter, expected.Select(x => x.Replace("\"", "\"\"")));
 
-            parser.Invoke(record, actual).ShouldBe(expected.Length);
+            parser.Parse(record, actual).ShouldBe(expected.Length);
 
             AreEqual(actual, expected).ShouldBeTrue();
         }
@@ -284,7 +284,7 @@ namespace Bogosoft.Data.Csv.Tests
             var actual = new string[expected.Length];
             var parser = Parser.Create(256, fieldDelimiter, quote);
 
-            parser.Invoke(record, actual).ShouldBe(expected.Length);
+            parser.Parse(record, actual).ShouldBe(expected.Length);
 
             AreEqual(actual, expected).ShouldBeTrue();
         }
@@ -300,7 +300,7 @@ namespace Bogosoft.Data.Csv.Tests
 
             var actual = new string[1];
 
-            parser.Invoke($"{quote}{expected}{quote}", actual).ShouldBe(1);
+            parser.Parse($"{quote}{expected}{quote}", actual).ShouldBe(1);
 
             actual[0].ShouldBe(expected);
         }
@@ -314,11 +314,11 @@ namespace Bogosoft.Data.Csv.Tests
 
             var record = string.Join(delimiter, expected);
 
-            var parser = Parser.Create(fieldDelimiter: delimiter);
+            var parser = Parser.Create(delimiter: delimiter);
 
             var actual = new string[expected.Length];
 
-            parser.Invoke(record, actual).ShouldBe(expected.Length);
+            parser.Parse(record, actual).ShouldBe(expected.Length);
 
             for (var i = 0; i < expected.Length; i++)
             {
@@ -342,19 +342,19 @@ namespace Bogosoft.Data.Csv.Tests
 
             string record;
 
-            var parser = Parser.Create(fieldDelimiter: delimiter);
+            var parser = Parser.Create(delimiter: delimiter);
 
             var actual = new string[expected.Length];
 
             record = string.Join(delimiter, expected);
 
-            Action test = () => parser.Invoke(record, actual);
+            Action test = () => parser.Parse(record, actual);
 
             test.ShouldThrow<IndexOutOfRangeException>();
 
             record = string.Join(delimiter, expected.Select(x => $@"""{x}"""));
 
-            parser.Invoke(record, actual).ShouldBe(expected.Length);
+            parser.Parse(record, actual).ShouldBe(expected.Length);
 
             for (var i = 0; i < expected.Length; i++)
             {
@@ -375,9 +375,9 @@ namespace Bogosoft.Data.Csv.Tests
 
             record.EndsWith(delimiter).ShouldBeTrue();
 
-            var parser = Parser.Create(fieldDelimiter: delimiter);
+            var parser = Parser.Create(delimiter: delimiter);
 
-            parser.Invoke(record, actual).ShouldBe(expected.Length + 1);
+            parser.Parse(record, actual).ShouldBe(expected.Length + 1);
         }
 
         [TestCase]
@@ -389,7 +389,7 @@ namespace Bogosoft.Data.Csv.Tests
 
             string record = $"{commentStart}I should be ignored.";
 
-            parser.Invoke(record, fields).ShouldBe(0);
+            parser.Parse(record, fields).ShouldBe(0);
         }
 
         [TestCase]
@@ -403,7 +403,7 @@ namespace Bogosoft.Data.Csv.Tests
 
             string.IsNullOrEmpty(record).ShouldBeTrue();
 
-            parser.Invoke(record, fields).ShouldBe(0);
+            parser.Parse(record, fields).ShouldBe(0);
         }
 
         [TestCase]
@@ -414,7 +414,7 @@ namespace Bogosoft.Data.Csv.Tests
 
             string record = null;
 
-            parser.Invoke(record, fields).ShouldBe(0);
+            parser.Parse(record, fields).ShouldBe(0);
         }
 
         [TestCase]
@@ -428,7 +428,7 @@ namespace Bogosoft.Data.Csv.Tests
 
             var parser = Parser.Create(delimiter, quote);
 
-            Action action = () => parser.Invoke(record, new string[1]);
+            Action action = () => parser.Parse(record, new string[1]);
 
             action.ShouldThrow<FormatException>(Message.UnterminatedQuote);
         }

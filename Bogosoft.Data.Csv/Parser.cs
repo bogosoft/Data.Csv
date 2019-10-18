@@ -12,6 +12,77 @@ namespace Bogosoft.Data.Csv
     /// </summary>
     public static class Parser
     {
+        class Default : IParser
+        {
+            readonly char[] buffer;
+            readonly char commentStart, delimiter, quote;
+
+            internal Default(char[] buffer, char commentStart, char delimiter, char quote)
+            {
+                this.buffer = buffer;
+                this.commentStart = commentStart;
+                this.delimiter = delimiter;
+                this.quote = quote;
+            }
+
+            public int Parse(string record, string[] fields)
+            {
+                if (string.IsNullOrEmpty(record) || record[0] == commentStart)
+                {
+                    return 0;
+                }
+
+                int blen = 0, flen = 0, i = 0, slen = record.Length;
+                char c = '\0';
+                bool quoted = false;
+
+                while (i < slen)
+                {
+                    c = record[i++];
+
+                    if (c == quote)
+                    {
+                        if (i < slen && record[i] == quote)
+                        {
+                            buffer[blen++] = quote;
+
+                            i += 1;
+                        }
+                        else
+                        {
+                            quoted = !quoted;
+                        }
+                    }
+                    else if (c == delimiter && !quoted)
+                    {
+                        fields[flen++] = blen > 0 ? new string(buffer, 0, blen) : "";
+
+                        blen = 0;
+                    }
+                    else
+                    {
+                        buffer[blen++] = c;
+                    }
+                }
+
+                if (quoted)
+                {
+                    throw new FormatException(Message.UnterminatedQuote);
+                }
+
+                if (blen > 0)
+                {
+                    fields[flen++] = new string(buffer, 0, blen);
+                }
+                else if (c == delimiter)
+                {
+                    fields[flen++] = "";
+                }
+
+                return flen;
+            }
+        }
+
         /// <summary>
         /// Add a field definition to the current list of field definitions. The resulting 
         /// <see cref="FieldDefinition.Type"/> field will be set to <see cref="string"/>.
@@ -63,12 +134,12 @@ namespace Bogosoft.Data.Csv
         }
 
         /// <summary>
-        /// Create a new CSV data parse.
+        /// Create a new CSV data parser. Quotes are escaped by doubling them up, i.e. '"' -> '""'.
         /// </summary>
         /// <param name="bufferSize">
         /// A value corresponding to the size of a buffer to be used during parsing.
         /// </param>
-        /// <param name="fieldDelimiter">
+        /// <param name="delimiter">
         /// A value corresponding to the character that delimits fields in an unparsed record.
         /// </param>
         /// <param name="quote">
@@ -78,21 +149,21 @@ namespace Bogosoft.Data.Csv
         /// A value corresponding to the character used to denote a commented-out line.
         /// </param>
         /// <returns>A new CSV data parser.</returns>
-        public static Func<string, string[], int> Create(
+        public static IParser Create(
             int bufferSize = 2048,
-            char fieldDelimiter = ',',
+            char delimiter = ',',
             char quote = '"',
             char commentStart = '#'
             )
         {
-            return Create(new char[bufferSize], fieldDelimiter, quote, commentStart);
+            return Create(new char[bufferSize], delimiter, quote, commentStart);
         }
 
         /// <summary>
-        /// Create a new CSV data parser.
+        /// Create a new CSV data parser. Quotes are escaped by doubling them up, i.e. '"' -> '""'.
         /// </summary>
         /// <param name="buffer">A buffer to be used when parsing lines.</param>
-        /// <param name="fieldDelimiter">
+        /// <param name="delimiter">
         /// A value corresponding to the character that delimits fields in an unparsed record.
         /// </param>
         /// <param name="quote">
@@ -105,76 +176,19 @@ namespace Bogosoft.Data.Csv
         /// <exception cref="ArgumentNullException">
         /// Thrown in the event that the given buffer is null.
         /// </exception>
-        public static Func<string, string[], int> Create(
+        public static IParser Create(
             char[] buffer,
-            char fieldDelimiter = ',',
+            char delimiter = ',',
             char quote = '"',
             char commentStart = '#'
             )
         {
-            int Parse(string line, string[] fields)
-            {
-                if (string.IsNullOrEmpty(line) || line[0] == commentStart)
-                {
-                    return 0;
-                }
-
-                int blen = 0, flen = 0, i = 0, slen = line.Length;
-                char c = '\0';
-                bool quoted = false;
-
-                while (i < slen)
-                {
-                    c = line[i++];
-
-                    if (c == quote)
-                    {
-                        if (i < slen && line[i] == quote)
-                        {
-                            buffer[blen++] = quote;
-
-                            i += 1;
-                        }
-                        else
-                        {
-                            quoted = !quoted;
-                        }
-                    }
-                    else if (c == fieldDelimiter && !quoted)
-                    {
-                        fields[flen++] = blen > 0 ? new string(buffer, 0, blen) : "";
-
-                        blen = 0;
-                    }
-                    else
-                    {
-                        buffer[blen++] = c;
-                    }
-                }
-
-                if (quoted)
-                {
-                    throw new FormatException(Message.UnterminatedQuote);
-                }
-
-                if (blen > 0)
-                {
-                    fields[flen++] = new string(buffer, 0, blen);
-                }
-                else if (c == fieldDelimiter)
-                {
-                    fields[flen++] = "";
-                }
-
-                return flen;
-            }
-
             if (buffer is null)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            return Parse;
+            return new Default(buffer, commentStart, delimiter, quote);
         }
 
         /// <summary>
@@ -189,7 +203,7 @@ namespace Bogosoft.Data.Csv
         /// Thrown in the event that the current parser, given sequence of lines or given receiver is null.
         /// </exception>
         public static IEnumerable<string[]> Parse(
-            this Func<string, string[], int> parser,
+            this IParser parser,
             IEnumerable<string> lines,
             string[] fields
             )
@@ -213,7 +227,7 @@ namespace Bogosoft.Data.Csv
 
             foreach (var line in lines)
             {
-                if ((parsed = parser.Invoke(line, fields)) > 0)
+                if ((parsed = parser.Parse(line, fields)) > 0)
                 {
                     yield return fields;
                 }
@@ -232,7 +246,7 @@ namespace Bogosoft.Data.Csv
         /// Thrown in the event that the current parser or given text reader is null.
         /// </exception>
         public static IEnumerable<string[]> Parse(
-            this Func<string, string[], int> parser,
+            this IParser parser,
             TextReader reader,
             string[] fields
             )
@@ -268,7 +282,7 @@ namespace Bogosoft.Data.Csv
         /// Thrown in the event that the current parser, given sequence of lines or given receiver is null.
         /// </exception>
         public static async IAsyncEnumerable<string[]> ParseAsync(
-            this Func<string, string[], int> parser,
+            this IParser parser,
             IAsyncEnumerable<string> lines,
             string[] fields,
             CancellationToken token = default
@@ -293,7 +307,7 @@ namespace Bogosoft.Data.Csv
 
             await foreach (var line in lines.WithCancellation(token))
             {
-                if ((parsed = parser.Invoke(line, fields)) > 0)
+                if ((parsed = parser.Parse(line, fields)) > 0)
                 {
                     yield return fields;
                 }
@@ -312,7 +326,7 @@ namespace Bogosoft.Data.Csv
         /// Thrown in the event that the current parser or given text reader is null.
         /// </exception>
         public static IAsyncEnumerable<string[]> ParseAsync(
-            this Func<string, string[], int> parser,
+            this IParser parser,
             TextReader reader,
             string[] fields,
             CancellationToken token = default
